@@ -2,7 +2,4 @@
 test
 2
 
-non-conflict change. 
-'
-
-
+non-conflict change.
