@@ -71,3 +71,4 @@ _testmain.go
 *.prof
 
 .idea
+golang_analogj_test
