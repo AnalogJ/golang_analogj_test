@@ -77,4 +77,4 @@ jobs:
         with:
           version_metadata_path: ${{ github.event.inputs.version_metadata_path }}
           upload_assets:
-            /go/src/github.com/analogj/golang_analogj_test/golang_analogj_test
+            golang_analogj_test
