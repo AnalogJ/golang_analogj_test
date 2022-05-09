@@ -1,0 +1,80 @@
+name: Release
+# This workflow is triggered manually
+on:
+  workflow_dispatch:
+    inputs:
+      version_bump_type:
+        description: 'Version Bump Type (major, minor, patch)'
+        required: true
+        default: 'patch'
+      version_metadata_path:
+        description: 'Path to file containing Version string'
+        required: true
+        default: 'pkg/version/version.go'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    container: golang:1.13
+    # Service containers to run with `build` (Required for end-to-end testing)
+    env:
+      PROJECT_PATH: /go/src/github.com/analogj/golang_analogj_test
+      CGO_ENABLED: 1
+    steps:
+      - name: Git
+        run: |
+          apt-get update && apt-get install -y software-properties-common
+          add-apt-repository ppa:git-core/ppa && apt-get update && apt-get install -y git
+          git --version
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Bump version
+        id: bump_version
+        uses: packagrio/action-bumpr-go@master
+        with:
+          version_bump_type: ${{ github.event.inputs.version_bump_type }}
+          version_metadata_path: ${{ github.event.inputs.version_metadata_path }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PACKAGR_GITHUB_TOKEN }} # Leave this line unchanged
+      - name: Test
+        run: |
+          mkdir -p $(dirname "$PROJECT_PATH")
+          cp -a $GITHUB_WORKSPACE $PROJECT_PATH
+          cd $PROJECT_PATH
+
+          go mod vendor
+          go test -v -tags "static" $(go list ./... | grep -v /vendor/)
+
+      - name: Build Binaries
+        run: |
+
+          cd $PROJECT_PATH
+          go build -ldflags "-extldflags=-static" -out golang_analogj_test -tags "static netgo" ${GO_WORKSPACE}/cmd/
+          chmod +x golang_analogj_test
+          file "golang_analogj_test" || true
+          ldd "golang_analogj_test" || true
+
+          # restore modified dir to GH workspace.
+          cp -arf $PROJECT_PATH/. $GITHUB_WORKSPACE/
+
+      - name: Commit Changes
+        id: commit
+        uses: packagrio/action-releasr-go@master
+        env:
+          # This is necessary in order to push a commit to the repo
+          GITHUB_TOKEN: ${{ secrets.PACKAGR_GITHUB_TOKEN }} # Leave this line unchanged
+        with:
+          version_metadata_path: ${{ github.event.inputs.version_metadata_path }}
+      - name: Publish Release
+        id: publish
+        uses: packagrio/action-publishr-go@master
+        env:
+          # This is necessary in order to push a commit to the repo
+          GITHUB_TOKEN: ${{ secrets.PACKAGR_GITHUB_TOKEN }} # Leave this line unchanged
+        with:
+          version_metadata_path: ${{ github.event.inputs.version_metadata_path }}
+          upload_assets:
+            /go/src/github.com/analogj/golang_analogj_test/golang_analogj_test
