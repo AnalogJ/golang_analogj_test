@@ -50,9 +50,8 @@ jobs:
 
       - name: Build Binaries
         run: |
-
           cd $PROJECT_PATH
-          go build -ldflags "-extldflags=-static" -o golang_analogj_test -tags "static netgo" ${PROJECT_PATH}/cmd/
+          go build -ldflags "-extldflags=-static" -o golang_analogj_test -tags "static netgo" ${PROJECT_PATH}/cmd/test.go
           chmod +x golang_analogj_test
           file "golang_analogj_test" || true
           ldd "golang_analogj_test" || true
