@@ -52,7 +52,7 @@ jobs:
         run: |
 
           cd $PROJECT_PATH
-          go build -ldflags "-extldflags=-static" -out golang_analogj_test -tags "static netgo" ${GO_WORKSPACE}/cmd/
+          go build -ldflags "-extldflags=-static" -o golang_analogj_test -tags "static netgo" ${GO_WORKSPACE}/cmd/
           chmod +x golang_analogj_test
           file "golang_analogj_test" || true
           ldd "golang_analogj_test" || true
