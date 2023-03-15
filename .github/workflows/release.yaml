@@ -33,7 +33,7 @@ jobs:
           fetch-depth: 0
       - name: Bump version
         id: bump_version
-        uses: packagrio/action-bumpr-go@master
+        uses: packagrio/action-bumpr-go@dogfood
         with:
           version_bump_type: ${{ github.event.inputs.version_bump_type }}
           version_metadata_path: ${{ github.event.inputs.version_metadata_path }}
@@ -62,7 +62,7 @@ jobs:
 
       - name: Commit Changes
         id: commit
-        uses: packagrio/action-releasr-go@master
+        uses: packagrio/action-releasr-go@dogfood
         env:
           # This is necessary in order to push a commit to the repo
           GITHUB_TOKEN: ${{ secrets.PACKAGR_GITHUB_TOKEN }} # Leave this line unchanged
@@ -70,7 +70,7 @@ jobs:
           version_metadata_path: ${{ github.event.inputs.version_metadata_path }}
       - name: Publish Release
         id: publish
-        uses: packagrio/action-publishr-go@master
+        uses: packagrio/action-publishr-go@dogfood
         env:
           # This is necessary in order to push a commit to the repo
           GITHUB_TOKEN: ${{ secrets.PACKAGR_GITHUB_TOKEN }} # Leave this line unchanged
